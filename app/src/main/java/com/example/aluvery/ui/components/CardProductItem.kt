@@ -1,6 +1,8 @@
 package com.example.aluvery.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -8,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -28,13 +31,21 @@ import java.math.BigDecimal
 fun CardProductItem(
     product: Product,
     modifier: Modifier = Modifier,
-    elevation: Dp = 4.dp
+    elevation: Dp = 4.dp,
+    isExpanded: Boolean  = false
 ) {
+    var expended by rememberSaveable {
+        mutableStateOf(isExpanded)
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(150.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = elevation)
+            .heightIn(150.dp)
+            .clickable {
+                expended = !expended
+            },
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = elevation),
     ) {
         Column {
             AsyncImage(
@@ -59,14 +70,16 @@ fun CardProductItem(
                     text = product.price.toBrazilianCurrency()
                 )
             }
-            product.description?.let {
-                 Text(
-                     text = product.description,
-                     Modifier
-                         .padding(16.dp),
-                     maxLines = 3,
-                     overflow = TextOverflow.Ellipsis
-                 )
+            if (expended) {
+                product.description?.let {
+                    Text(
+                        text = product.description,
+                        Modifier
+                            .padding(16.dp),
+//                        maxLines = 3,
+//                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
         }
@@ -97,8 +110,9 @@ private fun CardProductItemWithDescriptionPreview() {
                 product = Product(
                     name = "Teste",
                     price = BigDecimal("9.99"),
-                    description = LoremIpsum(50).values.first()
+                    description = LoremIpsum(50).values.first(),
                 ),
+                isExpanded = true
             )
         }
     }
